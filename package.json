@@ -1,33 +1,39 @@
 {
   "name": "@dreamonkey/quasar-app-extension-meta",
-  "version": "0.0.1",
-  "description": "A Quasar App Extension",
+  "version": "0.1.0",
+  "description": "Automatically manage social meta tags for websites projects hooking into Quasar Meta plugin",
+  "keywords": [
+    "quasar",
+    "meta tags",
+    "social"
+  ],
   "author": "Alessandro Vandelli <a.vandelli@dreamonkey.com>",
   "license": "MIT",
+  "files": [
+    "dist",
+    "src"
+  ],
   "main": "dist/exports.js",
+  "typings": "dist/types/exports.d.ts",
   "scripts": {
     "build": "rm -rf dist && tsc --declaration --declarationDir dist/types",
     "test": "echo \"No test specified\" && exit 0",
     "deploy": "yarn build && yarn publish --tag latest"
   },
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "bugs": "",
-  "homepage": "",
+  "repository": "github:dreamonkey/quasar-app-extension-meta",
+  "bugs": "https://github.com/dreamonkey/quasar-app-extension-meta/issues",
   "engines": {
     "node": ">= 8.9.0",
     "npm": ">= 5.6.0",
     "yarn": ">= 1.6.0"
-  },
-  "peerDependencies": {
-    "vue": "^2.6.12"
   },
   "devDependencies": {
     "@types/node": "^14.11.2",
     "typescript": "^4.0.3",
     "vue": "^2.6.12",
     "vue-router": "^3.4.5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
