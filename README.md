@@ -1,154 +1,198 @@
 # @dreamonkey/quasar-app-extension-meta
 
-This extension is made exclusively for [Quasar framework](https://quasar.dev/) and adds and simplify the use of their awesome [meta-plugin](https://quasar.dev/quasar-cli/developing-ssr/seo-for-ssr#Quasar-Meta-Plugin).
+This is a [Quasar App Extension (AE)](https://quasar.dev/app-extensions/introduction#Introduction)
+It adds minimal [meta tag](https://it.wikipedia.org/wiki/Meta_tag) to fill social network previews and provides you a better DX over [Quasar Meta Plugin](https://quasar.dev/quasar-cli/developing-ssr/seo-for-ssr#Quasar-Meta-Plugin), which is powerful but also verbose and somewhat difficult to understand.
 
-# Why should i use this extension
-
-There are several reasons why you should use this [AppExtension](https://quasar.dev/app-extensions/introduction#Introduction) and let me introduce you why:
-
-1. Better SEO:
-   You know that SEO is not a simple task to accomplish and you also know that your best performance depends on that. How someone can find your page under other tonns? Well this mixin doesn't instantli put you page on top of that pile of results but it really helps you to scales up your visibility!
-
-2. It's an app extension:
-   If you are using quasar framework why you shouldn't use something imagined and designed exclusively for the framework you are developing on? That means you shouldn't have any problem adding this on you web-site, right? (programmer joke)
-
-3. Why not using just the quasar-plugin offered by the framework:
-   Quasar give us an awesome plugin which comes handy in SEO and it' s called [Quasar-meta-plugin](https://quasar.dev/quasar-cli/developing-ssr/seo-for-ssr#Quasar-Meta-Plugin).
-   You could decide to handle meta tags in the classic way or decide to recive a little help. In fact this AE is not a sostitute of the plug-in rather is a UE boost to get the best out of it for who decide to use it.
-
-4. What can i do with this AppExtension:
-   You can set a title and a description for every page and the extension will automatically create and set standard tag also supported by social like:
-
-   - og:title
-   - og:description
-   - og:url
-   - og:type
-   - og:image
-
-5. As mentioned before to add a og:image you can just add a new image called `social-cover.jpg` inside your `statics` folder.
-
-6. You will boost your SEO in a blink of an eye
-
-# Install
+## Install
 
 ```bash
 quasar ext add @dreamonkey/meta
 ```
 
-Quasar CLI will retrieve it from the NPM registry and install the extension to your project.
-
-# Uninstall
+## Uninstall
 
 ```bash
 quasar ext remove @dreamonkey/meta
 ```
 
-# How to use it
+## Using Quasar Meta Plugin
 
-Just launch:
+> Get familiar with the concepts of [Layout and Pages](https://quasar.dev/layout/layout) before proceeding.
 
-```bash
-quasar ext add @dreamonkey/meta
-```
+To set the minimal meta tags to show you website nicely in posts on social networks, while using Quasar Meta Plugin, you'll need to write:
 
-to install the AE then import it on your _nested page_:
-
-```js
-import { PageMetaMixin } from "@dreamonkey/quasar-app-extension-meta";
-```
-
-and expose the mixin _in every nested page_ like so:
-
-```js
-
-const title = 'Page title';
-const description =
-  'Page description';
+```ts
+// src/layouts/main-layout.vue
 
 export default {
-  name: 'PageName',
+  name: "MainLayout",
+  data() {
+    return { metaTitle: "" };
+  },
+  meta() {
+    return {
+      titleTemplate: (title) => `${title} - FooBarAgency`,
+    };
+  },
+};
+```
+
+```ts
+// src/pages/contacts.vue
+
+const title = "Contacts";
+const description =
+  "Contact FooBarAgency with the online form or reach us in our office at 766 Parkway Street, Los Angeles, California.";
+
+export default {
+  name: "ContactPage",
+  meta: {
+    title,
+    meta: {
+      description: { name: "description", content: description },
+      ogTitle: { name: "og:title", content: title },
+      ogDescription: { name: "og:description", content: description },
+      ogUrl: {
+        name: "og:url",
+        content: "https://www.foo-bar-agency.com/contacts",
+      },
+      ogImage: {
+        name: "og:image",
+        content: "https://www.foo-bar-agency.com/social-cover.jpg",
+      },
+      ogType: { name: "og:type", content: "website" },
+    },
+  },
+};
+```
+
+## Using this AE
+
+We provide two mixins to simplify the DX.
+
+`LayoutMetaMixin` optionally adds a title prefix/suffix to pages displayed into a layout and sets minimal website-wide social tags (`title`) and meta tags (`og:title`, `og:type`, `og:image`).
+
+`og:image` searches for a cover image (shown in your social preview) stored into `public/social-cover.jpg`.
+
+`PageMetaMixin` sets minimal page-wide minimal social tags (`description`) and meta tags (`og:description`, `og:url`).
+
+Here are some examples:
+
+```ts
+// src/layouts/main-layout.vue
+
+import { LayoutMetaMixin } from "@dreamonkey/quasar-app-extension-meta";
+
+export default {
+  name: 'MainLayout',
+  mixins: [LayoutMetaMixin(title => `${title} - FooBarAgency`)],
+  data() {
+   ...
+  }
+}
+```
+
+```ts
+// src/pages/contacts.vue
+
+import { PageMetaMixin } from "@dreamonkey/quasar-app-extension-meta";
+
+const title = 'Contacts';
+const description =
+  'Contact FooBarAgency with the online form or reach us in our office at 766 Parkway Street, Los Angeles, California.';
+
+export default {
+  name: 'ContactPage',
   mixins: [PageMetaMixin(title, description)],
   data() {
     ...
-```
-
-Remember to change `Page title` and `Page description`.
-
-Then import it in the _layout_
-
-```js
-import { LayoutMetaMixin } from "@dreamonkey/quasar-app-extension-meta";
-```
-
-and expose it like so
-
-```js
-export default {
-  name: 'Layout',
-  mixins: [LayoutMetaMixin(title => `${title} - Web-site title`)],
-  data() {
-   ...
-```
-
-here remember to change the `- Web-site title`.
-This is usefull to add a prefix based on the nesting level of the pages but if you rather prefere to pass the title as it is use it like so:
-
-```js
-export default {
-  name: 'Layout',
-  mixins: [LayoutMetaMixin(title => title)],
-  data() {
-   ...
-```
-
-# How to test that everithing works just fine
-
-To test it if the web-site is online you can copy paste the link on this tester [https://metatags.io/](https://metatags.io/) or if your website is ssr/ssg served you can use [http://localhost.run/](http://localhost.run/).
-
-Or if you want to be sure try to share the link over a socal network instead and see the preview.
-
-# The simpler way
-
-Just watch inside the head tag on the html elements and see if meta tags are present.
-
-# Other info
-
-This extension also expose another feature that you can use if you wat to add a custom meta tag:
-
-```js
-import { metaTag } from "@dreamonkey/quasar-app-extension-meta";
-```
-
-And to use it you can pass the list of your meta tag and the value you want to assign them.
-For exaple let's try to manually set the `description` and the `og:description` to 'my description' and `title` and the `og:title` to 'my title':
-
-```js
-import { metaTag } from "@dreamonkey/quasar-app-extension-meta";
-
-const descriptionsNames = ['description','og:description'];
-const descriptionsValue = 'my description';
-
-const titlesNames = ['title','og:title'];
-const titlesValue = 'my title';
-
-export default {
-  name: 'Layout',
-  mixins: [metaTag],
-  data() {
-   ...
-  },
-  meta()
-  {
-    meta: ...metaTag(descriptionsNames, descriptionsValue);
-    meta: ...metaTag(titlesNames, titlesValue);
   }
-...
+}
 ```
 
-# License
+`` title => `${title} - FooBarAgency`  `` argument is useful to add a prefix/suffix to nested pages own title, but if no transformation is needed just leave it blank:
+
+```ts
+export default {
+  name: 'MainLayout',
+  mixins: [LayoutMetaMixin()], // <-- no argument here
+  data() {
+   ...
+  }
+}
+```
+
+This AE sets `og:url` and `og:image` based on the domain provided into `process.env.APP_DOMAIN` (read more about [process.env](https://quasar.dev/quasar-cli/handling-process-env#Adding-to-process.env)).
+If not provided, the app domain is deduced from `window.location.origin`.
+While building for SSR/SSG you _must_ set `process.env.APP_DOMAIN` as `window` object is not defined.
+
+How to set it:
+
+```ts
+//quasar.conf.js
+
+  build: {
+    env: ctx.prod
+      ? {
+          APP_DOMAIN: 'https://www.FooBarAgency.it',
+        }
+      : {},
+  }
+```
+
+We also expose a `metaTag` function which adds meta tags in a clearer and more elegant way.
+
+Suppose you don't want to use `LayoutMetaMixins` and `PageMetaMixins` and you want to provide meta tags for a twitter card.
+First you should search [which meta tags you need](https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/getting-started), then fill the `meta` object, here's an example:
+
+```ts
+import { metaTag } from "@dreamonkey/quasar-app-extension-meta";
+
+export default {
+  name: "MainLayout",
+  meta: {
+    meta: {
+      ...metaTag("twitter:card", "summary"),
+      ...metaTag("twitter:site", "@nytimesbits"),
+      ...metaTag("twitter:creator", "@nickbilton"),
+    },
+  },
+};
+```
+
+`metaTag` accepts the meta tag name, or an array of names, as first parameter and the value as second parameter.
+
+## Testing that everything works fine
+
+If the website is online you can test it using [this tool](https://metatags.io/).
+If your website is built for SSR/SSG, you can serve it locally, then use [http://localhost.run/](http://localhost.run/) to expose it.
+
+You could also test the website directly on the social network you want to support to see the actual preview.
+
+Be careful if you decide to search them inside the head tag because they can't be found there when in spa.
+
+# Cheat sheet
+
+```ts
+LayoutMetaMixin(
+  titleTemplateFn: (title: string) => string = (title) => title
+);
+```
+
+```ts
+PageMetaMixin(title: string, description: string);
+```
+
+```ts
+metaTag(names: string | string[], value: string);
+```
+
+`og:image` path: "public/social-cover.jpg"
+
+## License
 
 MIT
 
-# Donate
+## Donate
 
 If you appreciate the work that went into this App Extension, please consider [donating to Quasar](https://donate.quasar.dev).
