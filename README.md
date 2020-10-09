@@ -162,14 +162,14 @@ export default {
 
 `metaTag` accepts the meta tag name, or an array of names, as first parameter and the value as second parameter.
 
-## Testing that everything works fine
+## Testing social preview
 
 If the website is online you can test it using [this tool](https://metatags.io/).
-If your website is built for SSR/SSG, you can serve it locally, then use [http://localhost.run/](http://localhost.run/) to expose it.
+If your website is built for SSR/SSG, you can serve it locally, use [http://localhost.run/](http://localhost.run/) to expose it and test it with the previous tool.
 
-You could also test the website directly on the social network you want to support to see the actual preview.
+You can also copy/paste the website link directly into the social network you want to support and manually check the generated preview.
 
-Be careful if you decide to search them inside the head tag because they can't be found there when in spa.
+**Meta tags are computed by Quasar at runtime and outputted into `<head>` tag, but since most crawlers won't execute JS they won't be able to see the tags when your website is a SPA. You will need to use SSR or SSG to be sure all crawlers see the tags correctly**
 
 # Cheat sheet
 
