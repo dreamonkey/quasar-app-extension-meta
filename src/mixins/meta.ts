@@ -1,5 +1,6 @@
 import Vue from "vue";
 import "vue-router";
+import "vue-i18n";
 
 export function LayoutMetaMixin(
   titleTemplateFn: (title: string) => string = (title) => title
@@ -24,6 +25,48 @@ export function PageMetaMixin(title: string, description: string) {
   return {
     meta(this: Vue) {
       return { title, meta: pageSocialMetaTags(description, this.$route.path) };
+    },
+  };
+}
+
+export function PageMetaI18nMixin(
+  titleLabel: string,
+  descriptionLabel: string
+) {
+  return {
+    data() {
+      return {
+        metaI18nTitle: "",
+        metaI18nDescription: "",
+      };
+    },
+    watch: {
+      "$root.$i18n.locale": {
+        handler: function (
+          this: Vue & {
+            metaI18nTitle: string;
+            metaI18nDescription: string;
+          }
+        ) {
+          this.metaI18nTitle = this.$root.$i18n.t(titleLabel).toString();
+          this.metaI18nDescription = this.$root.$i18n
+            .t(descriptionLabel)
+            .toString();
+        },
+        immediate: true,
+      },
+    },
+    meta(
+      this: Vue & {
+        metaI18nTitle: string;
+        metaI18nDescription: string;
+        metaI18nRoutePath: string;
+      }
+    ) {
+      return {
+        title: this.metaI18nTitle,
+        meta: pageSocialMetaTags(this.metaI18nDescription, this.$route.path),
+      };
     },
   };
 }
