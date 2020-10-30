@@ -162,6 +162,42 @@ export default {
 
 `metaTag` accepts the meta tag name, or an array of names, as first parameter and the value as second parameter.
 
+## Dynamic support for i18n
+
+Before continue be sure to understand how [App Internationalization(i18n)](https://quasar.dev/options/app-internationalization#Introduction) works and keep in mind that your project must support it.
+
+Also be sure to understand [Custom directive localization](http://kazupon.github.io/vue-i18n/guide/directive.html#string-syntax)
+
+The above `PageMetaMixin` is awesome when you don't need to change tags and meta tags accordingly with the selected language.
+To solve this issue please use instead the `PageMetaMixinI18n`.
+
+### Using `PageMetaMixinI18n`
+
+```ts
+// src/pages/contacts.vue
+
+import { PageMetaMixinI18n } from "@dreamonkey/quasar-app-extension-meta";
+
+const titleLabel = 'contacts.metaTitle';  // <-- The title 'translation path'
+const descriptionLabel = 'contacts.metaDescription'; // <-- The description 'translation path'
+
+// Remember those are no longer the effective value you want to use to set title and description
+
+export default {
+  name: 'ContactPage',
+  mixins: [PageMetaMixinI18n(titleLabel, descriptionLabel)],
+  data() {
+    ...
+  }
+}
+```
+
+Those `translation path` should be the same you use to access translations in your page like
+
+```html
+<p>{{ $t('translation.path') }}</p>
+```
+
 ## Testing social preview
 
 If the website is online you can test it using [this tool](https://metatags.io/).
