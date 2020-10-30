@@ -1,8 +1,6 @@
 import Vue from "vue";
 import "vue-router";
-import VueI18n from "vue-i18n";
-Vue.use(VueI18n);
-// import VueI18n from "vue-i18n";
+import "vue-i18n";
 
 export function LayoutMetaMixin(
   titleTemplateFn: (title: string) => string = (title) => title
@@ -40,23 +38,7 @@ export function PageMetaMixinI18n(
       return {
         metaI18nTitle: "",
         metaI18nDescription: "",
-        metaI18nRoutePath: "",
       };
-    },
-    methods: {
-      changeTitle: function (this: Vue & { metaI18nTitle: string }) {
-        this.metaI18nTitle = this.$root.$i18n.t(titleLabel).toString();
-      },
-      changeDescription: function (
-        this: Vue & { metaI18nDescription: string }
-      ) {
-        this.metaI18nDescription = this.$root.$i18n
-          .t(descriptionLabel)
-          .toString();
-      },
-      changeRoutePath: function (this: Vue & { metaI18nRoutePath: string }) {
-        this.metaI18nRoutePath = this.$route.path;
-      },
     },
     watch: {
       "$root.$i18n.locale": {
@@ -64,15 +46,12 @@ export function PageMetaMixinI18n(
           this: Vue & {
             metaI18nTitle: string;
             metaI18nDescription: string;
-            metaI18nRoutePath: string;
-            changeTitle: () => void;
-            changeDescription: () => void;
-            changeRoutePath: () => void;
           }
         ) {
-          this.changeTitle();
-          this.changeDescription();
-          this.changeRoutePath();
+          this.metaI18nTitle = this.$root.$i18n.t(titleLabel).toString();
+          this.metaI18nDescription = this.$root.$i18n
+            .t(descriptionLabel)
+            .toString();
         },
         immediate: true,
       },
@@ -86,12 +65,7 @@ export function PageMetaMixinI18n(
     ) {
       return {
         title: this.metaI18nTitle,
-        meta: {
-          description: {
-            name: "description",
-            content: this.metaI18nDescription,
-          },
-        },
+        meta: pageSocialMetaTags(this.metaI18nDescription, this.$route.path),
       };
     },
   };
