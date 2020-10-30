@@ -1,5 +1,8 @@
 import Vue from "vue";
 import "vue-router";
+import VueI18n from "vue-i18n";
+Vue.use(VueI18n);
+// import VueI18n from "vue-i18n";
 
 export function LayoutMetaMixin(
   titleTemplateFn: (title: string) => string = (title) => title
@@ -24,6 +27,72 @@ export function PageMetaMixin(title: string, description: string) {
   return {
     meta(this: Vue) {
       return { title, meta: pageSocialMetaTags(description, this.$route.path) };
+    },
+  };
+}
+
+export function PageMetaMixinI18n(
+  titleLabel: string,
+  descriptionLabel: string
+) {
+  return {
+    data() {
+      return {
+        metaI18nTitle: "",
+        metaI18nDescription: "",
+        metaI18nRoutePath: "",
+      };
+    },
+    methods: {
+      changeTitle: function (this: Vue & { metaI18nTitle: string }) {
+        this.metaI18nTitle = this.$root.$i18n.t(titleLabel).toString();
+      },
+      changeDescription: function (
+        this: Vue & { metaI18nDescription: string }
+      ) {
+        this.metaI18nDescription = this.$root.$i18n
+          .t(descriptionLabel)
+          .toString();
+      },
+      changeRoutePath: function (this: Vue & { metaI18nRoutePath: string }) {
+        this.metaI18nRoutePath = this.$route.path;
+      },
+    },
+    watch: {
+      "$root.$i18n.locale": {
+        handler: function (
+          this: Vue & {
+            metaI18nTitle: string;
+            metaI18nDescription: string;
+            metaI18nRoutePath: string;
+            changeTitle: () => void;
+            changeDescription: () => void;
+            changeRoutePath: () => void;
+          }
+        ) {
+          this.changeTitle();
+          this.changeDescription();
+          this.changeRoutePath();
+        },
+        immediate: true,
+      },
+    },
+    meta(
+      this: Vue & {
+        metaI18nTitle: string;
+        metaI18nDescription: string;
+        metaI18nRoutePath: string;
+      }
+    ) {
+      return {
+        title: this.metaI18nTitle,
+        meta: {
+          description: {
+            name: "description",
+            content: this.metaI18nDescription,
+          },
+        },
+      };
     },
   };
 }
