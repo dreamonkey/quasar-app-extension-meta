@@ -29,7 +29,7 @@ export function PageMetaMixin(title: string, description: string) {
   };
 }
 
-export function PageMetaMixinI18n(
+export function PageMetaI18nMixin(
   titleLabel: string,
   descriptionLabel: string
 ) {

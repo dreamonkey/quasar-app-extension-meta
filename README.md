@@ -84,12 +84,12 @@ Here are some examples:
 import { LayoutMetaMixin } from "@dreamonkey/quasar-app-extension-meta";
 
 export default {
-  name: 'MainLayout',
-  mixins: [LayoutMetaMixin(title => `${title} - FooBarAgency`)],
+  name: "MainLayout",
+  mixins: [LayoutMetaMixin((title) => `${title} - FooBarAgency`)],
   data() {
-   ...
-  }
-}
+    // ...
+  },
+};
 ```
 
 ```ts
@@ -97,29 +97,29 @@ export default {
 
 import { PageMetaMixin } from "@dreamonkey/quasar-app-extension-meta";
 
-const title = 'Contacts';
+const title = "Contacts";
 const description =
-  'Contact FooBarAgency with the online form or reach us in our office at 766 Parkway Street, Los Angeles, California.';
+  "Contact FooBarAgency with the online form or reach us in our office at 766 Parkway Street, Los Angeles, California.";
 
 export default {
-  name: 'ContactPage',
+  name: "ContactPage",
   mixins: [PageMetaMixin(title, description)],
   data() {
-    ...
-  }
-}
+    // ...
+  },
+};
 ```
 
 `` title => `${title} - FooBarAgency`  `` argument is useful to add a prefix/suffix to nested pages own title, but if no transformation is needed just leave it blank:
 
 ```ts
 export default {
-  name: 'MainLayout',
+  name: "MainLayout",
   mixins: [LayoutMetaMixin()], // <-- no argument here
   data() {
-   ...
-  }
-}
+    // ...
+  },
+};
 ```
 
 This AE sets `og:url` and `og:image` based on the domain provided into `process.env.APP_DOMAIN` (read more about [process.env](https://quasar.dev/quasar-cli/handling-process-env#Adding-to-process.env)).
@@ -164,38 +164,54 @@ export default {
 
 ## Dynamic support for i18n
 
-Before continue be sure to understand how [App Internationalization(i18n)](https://quasar.dev/options/app-internationalization#Introduction) works and keep in mind that your project must support it.
+Be sure to understand how [App Internationalization (i18n)](https://quasar.dev/options/app-internationalization#Introduction) and [Custom directive localization](http://kazupon.github.io/vue-i18n/guide/directive.html#string-syntax) work before proceeding.
+This mixin assumes [`vue-i18n`](https://github.com/kazupon/vue-i18n) has already been set up in your project.
 
-Also be sure to understand [Custom directive localization](http://kazupon.github.io/vue-i18n/guide/directive.html#string-syntax)
+`PageMetaMixin` is perfect until you add internationalization to the mix, which requires to dynamically update you tags and meta tags accordingly to the selected language: `PageMetaI18nMixin` address this use case.
 
-The above `PageMetaMixin` is awesome when you don't need to change tags and meta tags accordingly with the selected language.
-To solve this issue please use instead the `PageMetaMixinI18n`.
+### Using `PageMetaI18nMixin`
 
-### Using `PageMetaMixinI18n`
+You use `PageMetaI18nMixin` exactly how you would use `PageMetaMixin`, except you provide "translation paths" as arguments instead of the text itself.
+The mixin automatically react to `$root.$i18n.locale` changes, updating meta tags accordingly.
+
+```ts
+// src/i18n/it/contacts.ts    <-- Notice these are the website italian translations
+
+export default {
+  meta: {
+    title: "Contatti",
+    description:
+      "Contatta FooBarAgency con il nostro modulo online o raggiungici in ufficio a Parkway Street 766, Los Angeles, California.",
+  },
+  form: {
+    title: "Contattaci compilando il nostro modulo!",
+  },
+  // ... other translations
+};
+```
 
 ```ts
 // src/pages/contacts.vue
 
-import { PageMetaMixinI18n } from "@dreamonkey/quasar-app-extension-meta";
+import { PageMetaI18nMixin } from "@dreamonkey/quasar-app-extension-meta";
 
-const titleLabel = 'contacts.metaTitle';  // <-- The title 'translation path'
-const descriptionLabel = 'contacts.metaDescription'; // <-- The description 'translation path'
-
-// Remember those are no longer the effective value you want to use to set title and description
+const titleLabel = "contacts.meta.title"; // <-- The title 'translation path'
+const descriptionLabel = "contacts.meta.description"; // <-- The description 'translation path'
 
 export default {
-  name: 'ContactPage',
-  mixins: [PageMetaMixinI18n(titleLabel, descriptionLabel)],
+  name: "ContactPage",
+  mixins: [PageMetaI18nMixin(titleLabel, descriptionLabel)],
   data() {
-    ...
-  }
-}
+    // ...
+  },
+};
 ```
 
-Those `translation path` should be the same you use to access translations in your page like
+The "translation paths" are those you use to access translations with `vue-i18n` methods.
+In the following snippet the "translation path" is `contacts.form.title`:
 
 ```html
-<p>{{ $t('translation.path') }}</p>
+<p>{{ $t('contacts.form.title') }}</p>
 ```
 
 ## Testing social preview
@@ -217,6 +233,10 @@ LayoutMetaMixin(
 
 ```ts
 PageMetaMixin(title: string, description: string);
+```
+
+```ts
+PageMetaI18nMixin(titleLabel: string, descriptionLabel: string);
 ```
 
 ```ts
