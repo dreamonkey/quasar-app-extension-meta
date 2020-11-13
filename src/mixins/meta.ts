@@ -15,7 +15,15 @@ export function LayoutMetaMixin(
           this.metaTitle = titleTemplateFn(title);
           return this.metaTitle;
         },
-        meta: layoutSocialMetaTags(this.metaTitle),
+        // meta: layoutSocialMetaTags(this.metaTitle),
+        meta: {
+          ogTitle: {
+            // optional; similar to titleTemplate, but allows templating with other meta properties
+            template(ogTitle: string) {
+              return titleTemplateFn(ogTitle);
+            },
+          },
+        },
       };
     },
   };
@@ -24,7 +32,16 @@ export function LayoutMetaMixin(
 export function PageMetaMixin(title: string, description: string) {
   return {
     meta(this: Vue) {
-      return { title, meta: pageSocialMetaTags(description, this.$route.path) };
+      return {
+        title,
+        meta: {
+          ogTitle: {
+            name: "og:title",
+            content: title,
+          },
+          ...pageSocialMetaTags(description, this.$route.path),
+        },
+      };
     },
   };
 }
@@ -65,7 +82,13 @@ export function PageMetaI18nMixin(
     ) {
       return {
         title: this.metaI18nTitle,
-        meta: pageSocialMetaTags(this.metaI18nDescription, this.$route.path),
+        meta: {
+          ogTitle: {
+            name: "og:title",
+            content: this.metaI18nTitle,
+          },
+          ...pageSocialMetaTags(this.metaI18nDescription, this.$route.path),
+        },
       };
     },
   };
