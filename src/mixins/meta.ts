@@ -22,7 +22,7 @@ export function PageMetaMixin(title: string, description: string) {
     meta(this: Vue) {
       return {
         title,
-        meta: pageSocialMetaTags(description, title, this.$route.path),
+        meta: pageSocialMetaTags(title, description, this.$route.path),
       };
     },
   };
@@ -65,8 +65,8 @@ export function PageMetaI18nMixin(
       return {
         title: this.metaI18nTitle,
         meta: pageSocialMetaTags(
-          this.metaI18nDescription,
           this.metaI18nTitle,
+          this.metaI18nDescription,
           this.$route.path
         ),
       };
@@ -76,14 +76,14 @@ export function PageMetaI18nMixin(
 
 function layoutSocialMetaTags(titleTemplateFn: TemplateFn) {
   return {
-    ...metaTag("og:type", "website"),
     ...metaTag("og:title", titleTemplateFn),
+    ...metaTag("og:type", "website"),
     // Image is crawled only when absolute URL is provided
     ...metaTag("og:image", `${domain()}/social-cover.jpg`),
   };
 }
 
-function pageSocialMetaTags(description: string, title: string, path: string) {
+function pageSocialMetaTags(title: string, description: string, path: string) {
   return {
     ...metaTag("og:title", title),
     ...metaTag(["description", "og:description"], description),
