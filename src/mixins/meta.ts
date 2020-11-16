@@ -2,20 +2,16 @@ import Vue from "vue";
 import "vue-router";
 import "vue-i18n";
 
+type TemplateFn = (title: string) => string;
+
 export function LayoutMetaMixin(
-  titleTemplateFn: (title: string) => string = (title) => title
+  titleTemplateFn: TemplateFn = (title) => title
 ) {
   return {
-    data() {
-      return { metaTitle: "" };
-    },
-    meta(this: { metaTitle: string }) {
+    meta() {
       return {
-        titleTemplate: (title: string) => {
-          this.metaTitle = titleTemplateFn(title);
-          return this.metaTitle;
-        },
-        meta: layoutSocialMetaTags(this.metaTitle),
+        titleTemplate: titleTemplateFn,
+        meta: layoutSocialMetaTags(titleTemplateFn),
       };
     },
   };
@@ -24,7 +20,10 @@ export function LayoutMetaMixin(
 export function PageMetaMixin(title: string, description: string) {
   return {
     meta(this: Vue) {
-      return { title, meta: pageSocialMetaTags(description, this.$route.path) };
+      return {
+        title,
+        meta: pageSocialMetaTags(title, description, this.$route.path),
+      };
     },
   };
 }
@@ -65,23 +64,28 @@ export function PageMetaI18nMixin(
     ) {
       return {
         title: this.metaI18nTitle,
-        meta: pageSocialMetaTags(this.metaI18nDescription, this.$route.path),
+        meta: pageSocialMetaTags(
+          this.metaI18nTitle,
+          this.metaI18nDescription,
+          this.$route.path
+        ),
       };
     },
   };
 }
 
-function layoutSocialMetaTags(title: string) {
+function layoutSocialMetaTags(titleTemplateFn: TemplateFn) {
   return {
-    ...metaTag("og:title", title),
+    ...metaTag("og:title", titleTemplateFn),
     ...metaTag("og:type", "website"),
     // Image is crawled only when absolute URL is provided
     ...metaTag("og:image", `${domain()}/social-cover.jpg`),
   };
 }
 
-function pageSocialMetaTags(description: string, path: string) {
+function pageSocialMetaTags(title: string, description: string, path: string) {
   return {
+    ...metaTag("og:title", title),
     ...metaTag(["description", "og:description"], description),
     ...metaTag("og:url", `${domain()}${path}`),
   };
@@ -95,14 +99,29 @@ function domain() {
     (process && process.env && process.env.APP_DOMAIN) || window.location.origin
   );
 }
-export function metaTag(names: string | string[], value: string) {
+export function metaTag(
+  names: string | string[],
+  valueOrTemplateFn: string | TemplateFn
+) {
   names = typeof names === "string" ? [names] : names;
 
   const metaTagsObject: {
-    [index: string]: { name: string; content: string };
+    [index: string]:
+      | { name: string; content: string }
+      | { name: string; template: TemplateFn };
   } = {};
-  for (const name of names) {
-    metaTagsObject[name] = { name, content: value };
+
+  if (typeof valueOrTemplateFn === "string") {
+    for (const name of names) {
+      metaTagsObject[name] = { name, content: valueOrTemplateFn };
+    }
+  } else {
+    for (const name of names) {
+      metaTagsObject[name] = {
+        name,
+        template: valueOrTemplateFn,
+      };
+    }
   }
 
   return metaTagsObject;
