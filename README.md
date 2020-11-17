@@ -132,7 +132,7 @@ How to set it:
 //quasar.conf.js
 
   build: {
-    env: ctx.prod
+    env: ctx.prod || ctx.mode.ssr
       ? {
           APP_DOMAIN: 'https://www.FooBarAgency.it',
         }
