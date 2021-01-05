@@ -1,6 +1,6 @@
 {
   "name": "@dreamonkey/quasar-app-extension-meta",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Automatically manage social meta tags for websites projects hooking into Quasar Meta plugin",
   "keywords": [
     "quasar",
