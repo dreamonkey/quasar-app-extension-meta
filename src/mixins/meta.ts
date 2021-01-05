@@ -1,5 +1,6 @@
 import Vue from "vue";
 import "vue-router";
+// TODO: find a way to tree-shake this away
 import "vue-i18n";
 
 type TemplateFn = (title: string) => string;
