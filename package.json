@@ -37,6 +37,6 @@
     "access": "public"
   },
   "dependencies": {
-    "vue-i18n": "^8.22.2"
+    "vue-i18n": "^8.22.4"
   }
 }
