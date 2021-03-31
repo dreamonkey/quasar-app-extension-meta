@@ -3,6 +3,20 @@ import "vue-router";
 // TODO: find a way to tree-shake this away
 import "vue-i18n";
 
+export interface QMetaI18nAlternateLocale {
+  locale: string;
+  url: string;
+}
+
+// TODO: we can improve this when there are other options by making the alternate optional
+export interface QMetaI18nOptions {
+  alternate: {
+    currentLocale?: QMetaI18nAlternateLocale;
+    locales: QMetaI18nAlternateLocale[];
+    openGraph?: boolean;
+  }
+}
+
 type TemplateFn = (title: string) => string;
 
 export function LayoutMetaMixin(
@@ -31,8 +45,12 @@ export function PageMetaMixin(title: string, description: string) {
 
 export function PageMetaI18nMixin(
   titleLabel: string,
-  descriptionLabel: string
+  descriptionLabel: string,
+  options?: QMetaI18nOptions,
 ) {
+  // Parses options
+  let alternateMeta = pageAlternateLocales(options?.alternate.locales ?? [], (options?.alternate.openGraph && options.alternate.currentLocale) ? options.alternate.currentLocale : undefined );
+
   return {
     data() {
       return {
@@ -70,6 +88,9 @@ export function PageMetaI18nMixin(
           this.metaI18nDescription,
           this.$route.path
         ),
+        link: {
+          ...(alternateMeta.links ?? {})
+        }
       };
     },
   };
@@ -100,6 +121,7 @@ function domain() {
     (process && process.env && process.env.APP_DOMAIN) || window.location.origin
   );
 }
+
 export function metaTag(
   names: string | string[],
   valueOrTemplateFn: string | TemplateFn
@@ -126,4 +148,50 @@ export function metaTag(
   }
 
   return metaTagsObject;
+}
+
+// ALernate locales generator
+export interface AlterateLocalLink {
+  href: string;
+  hreflang: string;
+  rel: "alternate";
+}
+
+export interface OpenGraphMetaTag {
+  content: string;
+  property: string;
+}
+
+function pageAlternateLocales(locales: QMetaI18nAlternateLocale[], useOpengraph?: QMetaI18nAlternateLocale) {
+  const currentDomain = domain();
+  
+  const links: {[index: string]: AlterateLocalLink } = {};
+  const metaAlternate: {[index: string]: OpenGraphMetaTag} = {};
+
+  for (const locale of locales) {
+    links["alt-" + locale.locale] = {
+      href: currentDomain + locale.url,
+      hreflang: locale.locale,
+      rel: "alternate",
+    };
+
+    if (useOpengraph) {
+      metaAlternate["og-alt-" + locale.locale] = {
+        content: currentDomain + locale.locale,
+        property: "og:locale:alternate",
+      };
+    }
+  }
+
+  if (useOpengraph) {
+    metaAlternate["og-alt-current-" + useOpengraph.locale] = {
+      content: currentDomain + useOpengraph.locale,
+      property: "og:locale:alternate",
+    };
+  }
+
+  return {
+    links,
+    metaAlternate,
+  };
 }
