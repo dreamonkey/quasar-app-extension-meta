@@ -11,10 +11,13 @@ export interface QMetaI18nAlternateLocale {
 // TODO: we can improve this when there are other options by making the alternate optional
 export interface QMetaI18nOptions {
   alternate: {
-    currentLocale?: QMetaI18nAlternateLocale;
-    locales: QMetaI18nAlternateLocale[];
     openGraph?: boolean;
   }
+}
+
+export interface QMetaI18nAlternate {
+  currentLocale?: QMetaI18nAlternateLocale;
+  locales: QMetaI18nAlternateLocale[];
 }
 
 type TemplateFn = (title: string) => string;
@@ -48,14 +51,12 @@ export function PageMetaI18nMixin(
   descriptionLabel: string,
   options?: QMetaI18nOptions,
 ) {
-  // Parses options
-  let alternateMeta = pageAlternateLocales(options?.alternate.locales ?? [], (options?.alternate.openGraph && options.alternate.currentLocale) ? options.alternate.currentLocale : undefined );
-
   return {
     data() {
       return {
         metaI18nTitle: "",
         metaI18nDescription: "",
+        metaI18nAlternate: undefined,
       };
     },
     watch: {
@@ -79,15 +80,20 @@ export function PageMetaI18nMixin(
         metaI18nTitle: string;
         metaI18nDescription: string;
         metaI18nRoutePath: string;
+        metaI18nAlternateLocale?: QMetaI18nAlternate;
       }
     ) {
+      // Parses options
+      const alternate = this.metaI18nAlternateLocale;
+      let alternateMeta = pageAlternateLocales(alternate?.locales ?? [], (options?.alternate.openGraph && alternate?.currentLocale) ? alternate.currentLocale : undefined );
+
       return {
         title: this.metaI18nTitle,
-        meta: pageSocialMetaTags(
+        meta: Object.assign(pageSocialMetaTags(
           this.metaI18nTitle,
           this.metaI18nDescription,
           this.$route.path
-        ),
+        ), alternateMeta.metaAlternate ?? {}),
         link: {
           ...(alternateMeta.links ?? {})
         }
@@ -175,18 +181,20 @@ function pageAlternateLocales(locales: QMetaI18nAlternateLocale[], useOpengraph?
       rel: "alternate",
     };
 
+    // The open graph locale only wants the language used
     if (useOpengraph) {
       metaAlternate["og-alt-" + locale.locale] = {
-        content: currentDomain + locale.locale,
+        content: locale.locale,
         property: "og:locale:alternate",
       };
     }
   }
 
+  // The open graph locale only wants the language used
   if (useOpengraph) {
     metaAlternate["og-alt-current-" + useOpengraph.locale] = {
-      content: currentDomain + useOpengraph.locale,
-      property: "og:locale:alternate",
+      content: useOpengraph.locale,
+      property: "og:locale",
     };
   }
 
