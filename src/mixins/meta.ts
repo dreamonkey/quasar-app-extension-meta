@@ -8,16 +8,20 @@ export interface QMetaI18nAlternateLocale {
   url: string;
 }
 
-// TODO: we can improve this when there are other options by making the alternate optional
-export interface QMetaI18nOptions {
-  alternate: {
-    openGraph?: boolean;
-  }
-}
-
 export interface QMetaI18nAlternate {
   currentLocale?: QMetaI18nAlternateLocale;
   locales: QMetaI18nAlternateLocale[];
+}
+
+export interface AlternateLocaleLink {
+  href: string;
+  hreflang: string;
+  rel: "alternate";
+}
+
+export interface OpenGraphMetaTag {
+  content: string;
+  property: string;
 }
 
 type TemplateFn = (title: string) => string;
@@ -49,7 +53,6 @@ export function PageMetaMixin(title: string, description: string) {
 export function PageMetaI18nMixin(
   titleLabel: string,
   descriptionLabel: string,
-  options?: QMetaI18nOptions,
 ) {
   return {
     data() {
@@ -83,19 +86,22 @@ export function PageMetaI18nMixin(
         metaI18nAlternateLocale?: QMetaI18nAlternate;
       }
     ) {
-      // Parses options
-      const alternate = this.metaI18nAlternateLocale;
-      let alternateMeta = pageAlternateLocales(alternate?.locales ?? [], (options?.alternate.openGraph && alternate?.currentLocale) ? alternate.currentLocale : undefined );
+      const alternateLocaleData = this.metaI18nAlternateLocale;
+      // Generate the alternate meta tags.
+      const alternateMetaTags = pageAlternateLocales(alternateLocaleData?.locales ?? [], alternateLocaleData?.currentLocale ?? undefined);
 
       return {
         title: this.metaI18nTitle,
-        meta: Object.assign(pageSocialMetaTags(
-          this.metaI18nTitle,
-          this.metaI18nDescription,
-          this.$route.path
-        ), alternateMeta.metaAlternate ?? {}),
+        meta: {
+          ...pageSocialMetaTags(
+            this.metaI18nTitle,
+            this.metaI18nDescription,
+            this.$route.path
+          ),
+          ...(alternateMetaTags.metaAlternate ?? {}),
+        },
         link: {
-          ...(alternateMeta.links ?? {})
+          ...(alternateMetaTags.linksAlternate ?? {})
         }
       };
     },
@@ -156,50 +162,43 @@ export function metaTag(
   return metaTagsObject;
 }
 
-// ALernate locales generator
-export interface AlterateLocalLink {
-  href: string;
-  hreflang: string;
-  rel: "alternate";
-}
-
-export interface OpenGraphMetaTag {
-  content: string;
-  property: string;
-}
-
-function pageAlternateLocales(locales: QMetaI18nAlternateLocale[], useOpengraph?: QMetaI18nAlternateLocale) {
+/**
+ * Alternate locales meta and link tags generator.
+ * @param locales Array of alternate locales the the webpage is currently available in.
+ * @param pageCurrentLocale
+ * @returns 
+ */
+function pageAlternateLocales(locales: QMetaI18nAlternateLocale[], pageCurrentLocale?: QMetaI18nAlternateLocale) {
   const currentDomain = domain();
   
-  const links: {[index: string]: AlterateLocalLink } = {};
+  const linksAlternate: {[index: string]: AlternateLocaleLink } = {};
   const metaAlternate: {[index: string]: OpenGraphMetaTag} = {};
 
-  for (const locale of locales) {
-    links["alt-" + locale.locale] = {
-      href: currentDomain + locale.url,
-      hreflang: locale.locale,
+  for (const {locale, url} of locales) {
+    linksAlternate["alt-" + locale] = {
+      href: currentDomain + url,
+      hreflang: locale,
       rel: "alternate",
     };
 
-    // The open graph locale only wants the language used
-    if (useOpengraph) {
-      metaAlternate["og-alt-" + locale.locale] = {
-        content: locale.locale,
-        property: "og:locale:alternate",
-      };
-    }
+    // [1] - The open graph locale only wants the language used as the value for the content property. See Open Graph https://ogp.me/
+    metaAlternate["og-alt-" + locale] = {
+      content: locale,
+      property: "og:locale:alternate",
+    };
   }
 
-  // The open graph locale only wants the language used
-  if (useOpengraph) {
-    metaAlternate["og-alt-current-" + useOpengraph.locale] = {
-      content: useOpengraph.locale,
+  // [1]
+  // In addition, Open Graph also wants to know the locale of the current page in this way.
+  if (pageCurrentLocale) {
+    metaAlternate["og-alt-current-" + pageCurrentLocale.locale] = {
+      content: pageCurrentLocale.locale,
       property: "og:locale",
     };
   }
 
   return {
-    links,
+    linksAlternate,
     metaAlternate,
   };
 }
