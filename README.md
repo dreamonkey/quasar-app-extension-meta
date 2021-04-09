@@ -167,12 +167,12 @@ export default {
 Be sure to understand how [App Internationalization (i18n)](https://quasar.dev/options/app-internationalization#Introduction) and [Custom directive localization](http://kazupon.github.io/vue-i18n/guide/directive.html#string-syntax) work before proceeding.
 This mixin assumes [`vue-i18n`](https://github.com/kazupon/vue-i18n) has already been set up in your project.
 
-`PageMetaMixin` is perfect until you add internationalization to the mix, which requires to dynamically update you tags and meta tags accordingly to the selected language: `PageMetaI18nMixin` address this use case.
+`PageMetaMixin` is perfect until you add internationalization to the mix, which requires to dynamically update your tags and meta tags accordingly to the selected language: `PageMetaI18nMixin` addresses this use case.
 
 ### Using `PageMetaI18nMixin`
 
 You use `PageMetaI18nMixin` exactly how you would use `PageMetaMixin`, except you provide "translation paths" as arguments instead of the text itself.
-The mixin automatically react to `$root.$i18n.locale` changes, updating meta tags accordingly.
+The mixin automatically reacts to `$root.$i18n.locale` changes, updating meta tags accordingly.
 
 ```ts
 // src/i18n/it/contacts.ts    <-- Notice these are the website italian translations
@@ -190,6 +190,12 @@ export default {
 };
 ```
 
+In addition, this plugin enforces best practices for SEO in two key aspects:
+1. adds [alternate locales](https://developers.google.com/search/docs/advanced/crawling/localized-versions) for search engines;
+2. adds [Open Graph locale tags](https://ogp.me/#optional) for better supporting Facebook and Twitter.
+
+As you can see by reading the resources provided above, to allow the plugin to create the correct tags you will need to provide an additional object called `metaI18nAlternateLocale` in the return statement of your `data()` or `setup()` functions.
+
 ```ts
 // src/pages/contacts.vue
 
@@ -203,6 +209,37 @@ export default {
   mixins: [PageMetaI18nMixin(titleLabel, descriptionLabel)],
   data() {
     // ...
+    return {
+      // [...] Other properties to return
+      metaI18nAlternateLocale: {
+        // Current page locale (for Open Graph)
+        currentLocale: {
+          locale: 'it', // format: [ISO 639-1 codes]-[ISO 3166-1 alpha-2]
+          url: '/it/contatti', // Relative url
+        },
+        // List of all locales the page is available in
+        locales: [
+          {
+            locale: 'it', // format: [ISO 639-1 codes]-[ISO 3166-1 alpha-2]
+            url: '/it/contatti', // Relative url
+          },
+          // Only for United Kingdom
+          {
+            locale: 'en-GB',
+            url: '/en-GB/contacts',
+          },
+          // For all other english countries
+          {
+            locale: 'en',
+            url: '/en/contacts',
+          },
+          {
+            locale: 'fr',
+            url: '/fr/contacts',
+          },
+        ];
+      },
+    };
   },
 };
 ```
@@ -213,6 +250,23 @@ In the following snippet the "translation path" is `contacts.form.title`:
 ```html
 <p>{{ $t('contacts.form.title') }}</p>
 ```
+
+The [ISO 639-1 codes](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) is the language code and [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) is the **optional** country code. See [this article](https://developers.google.com/search/docs/advanced/crawling/localized-versions#supported-languageregion-codes) for more examples.
+
+
+**Important**: as you may have noticed, this plugin assumes that the current Quasar application handles all different locales and alternate locale pages on the same base domain.
+But some techniques to differentiate locales include setting up multiple subdomains or entirely different domains.\
+For example you can have multiple locales of the same website like this:
+```
+Subdomains:
+https://www.it.foobar.com/homepage
+https://www.en.foobar.com/homepage
+
+or different domains:
+https://www.foo.com/homepage
+https://www.bar.com/homepage
+```
+These use cases are currenty **not** supported. If you need to support them feel free to submit a PR.
 
 ## Testing social preview
 
