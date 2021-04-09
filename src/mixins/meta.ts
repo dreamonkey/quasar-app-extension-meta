@@ -3,6 +3,27 @@ import "vue-router";
 // TODO: find a way to tree-shake this away
 import "vue-i18n";
 
+export interface QMetaI18nAlternateLocale {
+  locale: string;
+  url: string;
+}
+
+export interface QMetaI18nAlternate {
+  currentLocale?: QMetaI18nAlternateLocale;
+  locales: QMetaI18nAlternateLocale[];
+}
+
+export interface AlternateLocaleLink {
+  href: string;
+  hreflang: string;
+  rel: "alternate";
+}
+
+export interface OpenGraphMetaTag {
+  content: string;
+  property: string;
+}
+
 type TemplateFn = (title: string) => string;
 
 export function LayoutMetaMixin(
@@ -31,13 +52,14 @@ export function PageMetaMixin(title: string, description: string) {
 
 export function PageMetaI18nMixin(
   titleLabel: string,
-  descriptionLabel: string
+  descriptionLabel: string,
 ) {
   return {
     data() {
       return {
         metaI18nTitle: "",
         metaI18nDescription: "",
+        metaI18nAlternate: undefined,
       };
     },
     watch: {
@@ -61,15 +83,26 @@ export function PageMetaI18nMixin(
         metaI18nTitle: string;
         metaI18nDescription: string;
         metaI18nRoutePath: string;
+        metaI18nAlternateLocale?: QMetaI18nAlternate;
       }
     ) {
+      const { locales = [], currentLocale } = this.metaI18nAlternateLocale ?? {};
+      // Generate the alternate meta tags.
+      const {  metaAlternate: pageAlternateMetaTags, linksAlternate: pageAlternateLinks } = pageAlternateLocales(locales, currentLocale);
+
       return {
         title: this.metaI18nTitle,
-        meta: pageSocialMetaTags(
-          this.metaI18nTitle,
-          this.metaI18nDescription,
-          this.$route.path
-        ),
+        meta: {
+          ...pageSocialMetaTags(
+            this.metaI18nTitle,
+            this.metaI18nDescription,
+            this.$route.path
+          ),
+          ...(pageAlternateMetaTags ?? {}),
+        },
+        link: {
+          ...(pageAlternateLinks ?? {})
+        }
       };
     },
   };
@@ -100,6 +133,7 @@ function domain() {
     (process && process.env && process.env.APP_DOMAIN) || window.location.origin
   );
 }
+
 export function metaTag(
   names: string | string[],
   valueOrTemplateFn: string | TemplateFn
@@ -126,4 +160,45 @@ export function metaTag(
   }
 
   return metaTagsObject;
+}
+
+/**
+ * Alternate locales meta and link tags generator.
+ * @param locales Array of alternate locales the the webpage is currently available in.
+ * @param pageCurrentLocale
+ * @returns 
+ */
+function pageAlternateLocales(locales: QMetaI18nAlternateLocale[], pageCurrentLocale?: QMetaI18nAlternateLocale) {
+  const currentDomain = domain();
+  
+  const linksAlternate: {[index: string]: AlternateLocaleLink } = {};
+  const metaAlternate: {[index: string]: OpenGraphMetaTag} = {};
+
+  for (const {locale, url} of locales) {
+    linksAlternate["alt-" + locale] = {
+      href: currentDomain + url,
+      hreflang: locale,
+      rel: "alternate",
+    };
+
+    // [1] - The open graph locale only wants the language used as the value for the content property. See Open Graph https://ogp.me/
+    metaAlternate["og-alt-" + locale] = {
+      content: locale,
+      property: "og:locale:alternate",
+    };
+  }
+
+  // [1]
+  // In addition, Open Graph also wants to know the locale of the current page in this way.
+  if (pageCurrentLocale) {
+    metaAlternate["og-alt-current-" + pageCurrentLocale.locale] = {
+      content: pageCurrentLocale.locale,
+      property: "og:locale",
+    };
+  }
+
+  return {
+    linksAlternate,
+    metaAlternate,
+  };
 }
