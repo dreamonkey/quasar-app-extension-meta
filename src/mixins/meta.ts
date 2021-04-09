@@ -86,9 +86,9 @@ export function PageMetaI18nMixin(
         metaI18nAlternateLocale?: QMetaI18nAlternate;
       }
     ) {
-      const alternateLocaleData = this.metaI18nAlternateLocale;
+      const { locales = [], currentLocale } = this.metaI18nAlternateLocale ?? {};
       // Generate the alternate meta tags.
-      const alternateMetaTags = pageAlternateLocales(alternateLocaleData?.locales ?? [], alternateLocaleData?.currentLocale ?? undefined);
+      const {  metaAlternate: pageAlternateMetaTags, linksAlternate: pageAlternateLinks } = pageAlternateLocales(locales, currentLocale);
 
       return {
         title: this.metaI18nTitle,
@@ -98,10 +98,10 @@ export function PageMetaI18nMixin(
             this.metaI18nDescription,
             this.$route.path
           ),
-          ...(alternateMetaTags.metaAlternate ?? {}),
+          ...(pageAlternateMetaTags ?? {}),
         },
         link: {
-          ...(alternateMetaTags.linksAlternate ?? {})
+          ...(pageAlternateLinks ?? {})
         }
       };
     },
