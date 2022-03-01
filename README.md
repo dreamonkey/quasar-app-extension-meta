@@ -1,7 +1,7 @@
 # @dreamonkey/quasar-app-extension-meta
 
 This is a [Quasar App Extension (AE)](https://quasar.dev/app-extensions/introduction#Introduction)
-It adds minimal [meta tag](https://it.wikipedia.org/wiki/Meta_tag) to fill social network previews and provides you a better DX over [Quasar Meta Plugin](https://quasar.dev/quasar-cli/developing-ssr/seo-for-ssr#Quasar-Meta-Plugin), which is powerful but also verbose and somewhat difficult to understand.
+It adds minimal [meta tag](https://it.wikipedia.org/wiki/Meta_tag) to fill social network previews and provides you a better DX over [Quasar Meta Composable](https://quasar.dev/vue-composables/use-meta), which is powerful but also verbose and somewhat difficult to understand.
 
 ## Install
 
@@ -15,79 +15,90 @@ quasar ext add @dreamonkey/meta
 quasar ext remove @dreamonkey/meta
 ```
 
-## Using Quasar Meta Plugin
+## Using Classic Quasar Meta Composable
 
 > Get familiar with the concepts of [Layout and Pages](https://quasar.dev/layout/layout) before proceeding.
 
-To set the minimal meta tags to show you website nicely in posts on social networks, while using Quasar Meta Plugin, you'll need to write:
+With Quasar V2 we can use the [Quasar Meta Composable](https://quasar.dev/vue-composables/use-meta) in order to set meta tags like so:
 
 ```ts
 // src/layouts/main-layout.vue
 
+import { useMeta } from 'quasar';
+
 export default {
-  name: "MainLayout",
-  data() {
-    return { metaTitle: "" };
-  },
-  meta() {
-    return {
-      titleTemplate: (title) => `${title} - FooBarAgency`,
-    };
+  name: 'MainLayout',
+  setup() {
+    useMeta(() => {
+      return {
+        titleTemplate: (title) => `${title} - FooBarAgency`,
+      };
+    });
+
+    return {};
   },
 };
 ```
 
 ```ts
 // src/pages/contacts.vue
+import { useMeta } from 'quasar';
 
-const title = "Contacts";
+const title = 'Contacts';
 const description =
-  "Contact FooBarAgency with the online form or reach us in our office at 766 Parkway Street, Los Angeles, California.";
+  'Contact FooBarAgency with the online form or reach us in our office at 766 Parkway Street, Los Angeles, California.';
 
 export default {
-  name: "ContactPage",
-  meta: {
-    title,
-    meta: {
-      description: { name: "description", content: description },
-      ogTitle: { name: "og:title", content: title },
-      ogDescription: { name: "og:description", content: description },
-      ogUrl: {
-        name: "og:url",
-        content: "https://www.foo-bar-agency.com/contacts",
-      },
-      ogImage: {
-        name: "og:image",
-        content: "https://www.foo-bar-agency.com/social-cover.jpg",
-      },
-      ogType: { name: "og:type", content: "website" },
-    },
+  name: 'ContactsPage',
+  setup() {
+    useMeta(() => {
+      return {
+        title,
+        meta: {
+          description: { name: 'description', content: description },
+          ogTitle: { name: 'og:title', content: title },
+          ogDescription: { name: 'og:description', content: description },
+          ogUrl: {
+            name: 'og:url',
+            content: 'https://www.foo-bar-agency.com/contacts',
+          },
+          ogImage: {
+            name: 'og:image',
+            content: 'https://www.foo-bar-agency.com/social-cover.jpg',
+          },
+          ogType: { name: 'og:type', content: 'website' },
+        },
+      };
+    });
+
+    return {};
   },
 };
 ```
 
 ## Using this AE
 
-We provide two mixins to simplify the DX.
+We provide two composables to simplify the DX and get things easier and faster.
 
-`LayoutMetaMixin` optionally adds a title prefix/suffix to pages displayed into a layout and sets minimal website-wide social tags (`title`) and meta tags (`og:title`, `og:type`, `og:image`).
+`useLayoutSocialMeta` optionally adds a title prefix/suffix to pages displayed into a layout and sets minimal website-wide social tags (`title`) and meta tags (`og:title`, `og:type`, `og:image`).
 
 `og:image` searches for a cover image (shown in your social preview) stored into `public/social-cover.jpg`.
 
-`PageMetaMixin` sets minimal page-wide minimal social tags (`description`) and meta tags (`og:description`, `og:url`).
+`usePageSocialMeta` sets minimal page-wide minimal social tags (`description`) and meta tags (`og:description`, `og:url`).
 
 Here are some examples:
 
 ```ts
 // src/layouts/main-layout.vue
 
-import { LayoutMetaMixin } from "@dreamonkey/quasar-app-extension-meta";
+import { useLayoutSocialMeta } from '@dreamonkey/quasar-app-extension-meta';
 
 export default {
-  name: "MainLayout",
-  mixins: [LayoutMetaMixin((title) => `${title} - FooBarAgency`)],
-  data() {
-    // ...
+  name: 'MainLayout',
+  setup() {
+    useLayoutSocialMeta((title) => `${title} - FooBarAgency`);
+
+    return {};
   },
 };
 ```
@@ -95,17 +106,18 @@ export default {
 ```ts
 // src/pages/contacts.vue
 
-import { PageMetaMixin } from "@dreamonkey/quasar-app-extension-meta";
+import { usePageSocialMeta } from '@dreamonkey/quasar-app-extension-meta';
 
-const title = "Contacts";
+const title = 'Contacts';
 const description =
-  "Contact FooBarAgency with the online form or reach us in our office at 766 Parkway Street, Los Angeles, California.";
+  'Contact FooBarAgency with the online form or reach us in our office at 766 Parkway Street, Los Angeles, California.';
 
 export default {
-  name: "ContactPage",
-  mixins: [PageMetaMixin(title, description)],
-  data() {
-    // ...
+  name: 'ContactsPage',
+  setup() {
+    usePageSocialMeta(title, description);
+
+    return {};
   },
 };
 ```
@@ -114,10 +126,11 @@ export default {
 
 ```ts
 export default {
-  name: "MainLayout",
-  mixins: [LayoutMetaMixin()], // <-- no argument here
-  data() {
-    // ...
+  name: 'MainLayout',
+  setup() {
+    useLayoutSocialMeta(); // <-- no argument here
+
+    return {};
   },
 };
 ```
@@ -142,27 +155,36 @@ How to set it:
 
 We also expose a `metaTag` function which adds meta tags in a clearer and more elegant way.
 
-Suppose you don't want to use `LayoutMetaMixins` and `PageMetaMixins` and you want to provide meta tags for a twitter card.
+Suppose you don't want to use `useLayoutSocialMeta` and `usePageSocialMeta` and you want to provide meta tags for a twitter card.
 First you should search [which meta tags you need](https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/getting-started), then fill the `meta` object, here's an example:
 
 ```ts
-import { metaTag } from "@dreamonkey/quasar-app-extension-meta";
+import { metaTag } from '@dreamonkey/quasar-app-extension-meta';
+
+import { useMeta } from 'quasar';
 
 export default {
-  name: "MainLayout",
-  meta: {
-    meta: {
-      ...metaTag("twitter:card", "summary"),
-      ...metaTag("twitter:site", "@nytimesbits"),
-      ...metaTag("twitter:creator", "@nickbilton"),
-    },
+  name: 'HomePage',
+  setup() {
+    useMeta({
+        ...metaTag('twitter:card', 'summary'),
+        ...metaTag('twitter:site', '@fooBarAgency'),
+        ...metaTag('twitter:creator', '@MarioRossi'),
+      };
+    );
+
+    return {};
   },
 };
 ```
 
-`metaTag` accepts the meta tag name, or an array of names, as first parameter and the value as second parameter.
+`metaTag` accepts 3 parameters:
 
-## Dynamic support for i18n
+- Meta tag name or an array of names as first parameter;
+- Value or Template Function as second parameter;
+- Attribute name. By default is set as `auto` but could be set to `name` or `property` based on the meta you would use ([See More](https://stackoverflow.com/questions/22350105/whats-the-difference-between-meta-name-and-meta-property#:~:text=The%20name%20attribute%20is%20the,they%20contain%20a%20property%20attribute.)).
+
+## Dynamic support for i18n (Not ready for QuasarV2)
 
 Be sure to understand how [App Internationalization (i18n)](https://quasar.dev/options/app-internationalization#Introduction) and [Custom directive localization](http://kazupon.github.io/vue-i18n/guide/directive.html#string-syntax) work before proceeding.
 This mixin assumes [`vue-i18n`](https://github.com/kazupon/vue-i18n) has already been set up in your project.
@@ -179,12 +201,12 @@ The mixin automatically react to `$root.$i18n.locale` changes, updating meta tag
 
 export default {
   meta: {
-    title: "Contatti",
+    title: 'Contatti',
     description:
-      "Contatta FooBarAgency con il nostro modulo online o raggiungici in ufficio a Parkway Street 766, Los Angeles, California.",
+      'Contatta FooBarAgency con il nostro modulo online o raggiungici in ufficio a Parkway Street 766, Los Angeles, California.',
   },
   form: {
-    title: "Contattaci compilando il nostro modulo!",
+    title: 'Contattaci compilando il nostro modulo!',
   },
   // ... other translations
 };
@@ -193,13 +215,13 @@ export default {
 ```ts
 // src/pages/contacts.vue
 
-import { PageMetaI18nMixin } from "@dreamonkey/quasar-app-extension-meta";
+import { PageMetaI18nMixin } from '@dreamonkey/quasar-app-extension-meta';
 
-const titleLabel = "contacts.meta.title"; // <-- The title 'translation path'
-const descriptionLabel = "contacts.meta.description"; // <-- The description 'translation path'
+const titleLabel = 'contacts.meta.title'; // <-- The title 'translation path'
+const descriptionLabel = 'contacts.meta.description'; // <-- The description 'translation path'
 
 export default {
-  name: "ContactPage",
+  name: 'ContactPage',
   mixins: [PageMetaI18nMixin(titleLabel, descriptionLabel)],
   data() {
     // ...
@@ -226,13 +248,11 @@ You can also copy/paste the website link directly into the social network you wa
 # Cheat sheet
 
 ```ts
-LayoutMetaMixin(
-  titleTemplateFn: (title: string) => string = (title) => title
-);
+useLayoutSocialMeta(titleTemplateFn: (title: string) => string = (title = '') => title)
 ```
 
 ```ts
-PageMetaMixin(title: string, description: string);
+usePageSocialMeta(title: string, description: string);
 ```
 
 ```ts
@@ -240,7 +260,11 @@ PageMetaI18nMixin(titleLabel: string, descriptionLabel: string);
 ```
 
 ```ts
-metaTag(names: string | string[], value: string);
+metaTag(
+  names: string | string[],
+  valueOrTemplateFn: string | (title: string) => string,
+  attributeName: 'auto' | 'name' | 'property' = 'auto'
+)
 ```
 
 `og:image` path: "public/social-cover.jpg"

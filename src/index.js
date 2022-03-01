@@ -11,5 +11,12 @@ module.exports = function (api) {
     conf.build.transpileDependencies.push(
       /@dreamonkey[\\/]quasar-app-extension-meta/
     );
+
+    if (
+      api.ctx.dev === true &&
+      (conf.build.env === undefined || conf.build.env.APP_DOMAIN === undefined)
+    ) {
+      conf.build.env.APP_DOMAIN = undefined;
+    }
   });
 };
