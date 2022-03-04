@@ -172,11 +172,11 @@ export default {
 Be sure to understand how [App Internationalization (i18n)](https://quasar.dev/options/app-internationalization#Introduction) works before proceeding.
 This mixin assumes [`vue-i18n`](https://github.com/intlify/vue-i18n-next) has already been set up in your project.
 
-`usePageSocialMeta` is perfect until you add internationalization to the mix, which requires to dynamically update you tags and meta tags accordingly to the selected language: `usePageSocialMeta18n` address this use case.
+`usePageSocialMeta` is perfect until you add internationalization to the mix, which requires to dynamically update you tags and meta tags accordingly to the selected language: `usePageSocialMetaI18n` address this use case.
 
-### Using `usePageSocialMeta18n`
+### Using `usePageSocialMetaI18n`
 
-You use `usePageSocialMeta18n` exactly how you would use `usePageSocialMeta`, except you provide "translation paths" as arguments instead of the text itself.
+You use `usePageSocialMetaI18n` exactly how you would use `usePageSocialMeta`, except you provide "translation paths" as arguments instead of the text itself.
 The mixin automatically react to locale changes, updating meta tags accordingly.
 
 ```ts
@@ -198,7 +198,7 @@ export default {
 ```ts
 // src/pages/contacts.vue
 
-import { usePageSocialMeta18n } from "@dreamonkey/quasar-app-extension-meta";
+import { usePageSocialMetaI18n } from "@dreamonkey/quasar-app-extension-meta/i18n";
 
 const titlePath = "contacts.meta.title"; // <-- The title 'translation path'
 const descriptionPath = "contacts.meta.description"; // <-- The description 'translation path'
@@ -206,7 +206,7 @@ const descriptionPath = "contacts.meta.description"; // <-- The description 'tra
 export default {
   name: "ContactPage",
   setup() {
-    usePageSocialMeta18n(titlePath, descriptionPath);
+    usePageSocialMetaI18n(titlePath, descriptionPath);
   },
 };
 ```
@@ -238,7 +238,7 @@ usePageSocialMeta(title: string, description: string);
 ```
 
 ```ts
-usePageSocialMeta18n(titlePath: string, descriptionPath: string);
+usePageSocialMetaI18n(titlePath: string, descriptionPath: string);
 ```
 
 ```ts
