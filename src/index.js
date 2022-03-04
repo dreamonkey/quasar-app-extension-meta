@@ -12,11 +12,18 @@ module.exports = function (api) {
       /@dreamonkey[\\/]quasar-app-extension-meta/
     );
 
-    if (
-      api.ctx.dev === true &&
-      (conf.build.env === undefined || conf.build.env.APP_DOMAIN === undefined)
-    ) {
-      conf.build.env.APP_DOMAIN = undefined;
+    // Quasar doesn't perform process.env variables replacement at compile time
+    // when the env variable isn't defined at all.
+    // This is fine into prod mode where the APP_DOMAIN must be defined,
+    // but will cause problems when running into dev mode and composing the domain base dynamically
+    if (api.ctx.dev === true) {
+      if (conf.build.env === undefined) {
+        conf.build.env = {};
+      }
+
+      if (conf.build.env.APP_DOMAIN === undefined) {
+        conf.build.env.APP_DOMAIN = undefined;
+      }
     }
   });
 };
