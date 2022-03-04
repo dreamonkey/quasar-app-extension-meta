@@ -10,18 +10,18 @@
 // and match the output folder of the i18n build step. It cannot reference the related module
 // or it would import it at compile time
 
-// This should be a .ts file (instead of a .d.ts) to not being elided at compile time by TS,
+// This must be a .ts file (instead of a .d.ts) to not being elided at compile time by TS,
 // which would make it useless
 
 // Since i18n files depends on `internals` helpers, we cannot put them into a separate `i18n` folder
 // or they'll be compiled into a nested structure, and we must keep a flat one.
 // This isn't ideal since we get an `index` file which is actually i18n-related
 
-// The solution we fould is a bit esoteric, but at least works
+// The solution we found is a bit esoteric, but at least works
 // When TS will support native ESM modules, which allow multiple entry points,
 // we should be able to remove this workaround and rely on something much simpler
 
-declare module "@dreamonkey/quasar-app-extension-meta/i18n" {
+declare module '@dreamonkey/quasar-app-extension-meta/i18n' {
   function usePageSocialMetaI18n(
     titlePath: string,
     descriptionPath: string
