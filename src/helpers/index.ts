@@ -1,7 +1,7 @@
 import { useMeta } from "quasar";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import { pageSocialMetaTags } from "../internals";
+import { pageSocialMetaTags } from "./internals";
 
 export function usePageSocialMetaI18n(
   titlePath: string,

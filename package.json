@@ -13,10 +13,10 @@
     "dist",
     "src"
   ],
-  "main": "dist/meta.js",
-  "typings": "dist/types/meta.d.ts",
+  "main": "dist/exports.js",
+  "types": "dist/exports.d.ts",
   "scripts": {
-    "build": "rm -rf dist && tsc --declaration --declarationDir dist/types",
+    "build": "rm -rf dist i18n && tsc --declaration && tsc --project tsconfig.i18n.json",
     "install-build-clean": "yarn install && yarn build && rm -rf node_modules",
     "test": "echo \"No test specified\" && exit 0",
     "deploy": "yarn build && yarn publish --tag latest"

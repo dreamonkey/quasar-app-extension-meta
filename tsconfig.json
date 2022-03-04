@@ -8,5 +8,5 @@
     "moduleResolution": "node",
     "module": "esnext"
   },
-  "include": ["src/meta.ts", "src/i18n/index.ts"]
+  "include": ["src/helpers/exports.ts"]
 }
