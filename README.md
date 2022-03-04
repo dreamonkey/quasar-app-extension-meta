@@ -121,9 +121,9 @@ export default {
 };
 ```
 
-This AE sets `og:url` and `og:image` based on the domain provided into `process.env.APP_DOMAIN` (read more about [process.env](https://quasar.dev/quasar-cli/handling-process-env#Adding-to-process.env)).
+This AE sets `og:url` and `og:image` based on the domain provided into `process.env.META_APP_DOMAIN` (read more about [process.env](https://quasar.dev/quasar-cli/handling-process-env#Adding-to-process.env)).
 If not provided, the app domain is deduced from `window.location.origin`.
-While building for SSR/SSG you _must_ set `process.env.APP_DOMAIN` as `window` object is not defined.
+While building for SSR/SSG you _must_ set `process.env.META_APP_DOMAIN` as `window` object is not defined.
 
 How to set it:
 
@@ -133,7 +133,7 @@ How to set it:
   build: {
     env: ctx.prod || ctx.mode.ssr
       ? {
-          APP_DOMAIN: "https://www.FooBarAgency.it",
+          META_APP_DOMAIN: "https://www.FooBarAgency.it",
         }
       : {},
   }
