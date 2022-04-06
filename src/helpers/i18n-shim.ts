@@ -21,7 +21,7 @@
 // When TS will support native ESM modules, which allow multiple entry points,
 // we should be able to remove this workaround and rely on something much simpler
 
-declare module '@dreamonkey/quasar-app-extension-meta/i18n' {
+declare module "@dreamonkey/quasar-app-extension-meta/i18n" {
   function usePageSocialMetaI18n(
     titlePath: string,
     descriptionPath: string

@@ -11,7 +11,8 @@
   "license": "MIT",
   "files": [
     "dist",
-    "src"
+    "src",
+    "i18n"
   ],
   "main": "dist/exports.js",
   "types": "dist/exports.d.ts",
