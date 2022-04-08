@@ -2,6 +2,13 @@ import type { MetaOptions } from "quasar/dist/types/meta";
 
 export type TemplateFn = (value: string) => string;
 
+export function domain() {
+  // When building for SSR or SSG, it's required to provide the app domain via META_APP_DOMAIN env variable
+  // See https://quasar.dev/quasar-cli/handling-process-env#Import-based-on-process.env
+  // If it's not provided, an error will be raised due to undefined window object being accessed (this is on purpose)
+  return process.env.META_APP_DOMAIN || window.location.origin;
+}
+
 export function layoutSocialMetaTags(
   titleTemplateFn: TemplateFn
 ): MetaOptions["meta"] {
@@ -23,13 +30,6 @@ export function pageSocialMetaTags(
     ...metaTag(["description", "og:description"], description),
     ...metaTag("og:url", `${domain()}${path}`),
   };
-}
-
-function domain() {
-  // When building for SSR or SSG, it's required to provide the app domain via META_APP_DOMAIN env variable
-  // See https://quasar.dev/quasar-cli/handling-process-env#Import-based-on-process.env
-  // If it's not provided, an error will be raised due to undefined window object being accessed (this is on purpose)
-  return process.env.META_APP_DOMAIN || window.location.origin;
 }
 
 const html5Properties = [

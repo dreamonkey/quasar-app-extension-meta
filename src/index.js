@@ -8,6 +8,7 @@
 
 module.exports = function (api) {
   api.extendQuasarConf((conf) => {
+    conf.framework.plugins.push("Meta");
     conf.build.transpileDependencies.push(
       /@dreamonkey[\\/]quasar-app-extension-meta/
     );

@@ -124,6 +124,7 @@ export default {
 This AE sets `og:url` and `og:image` based on the domain provided into `process.env.META_APP_DOMAIN` (read more about [process.env](https://quasar.dev/quasar-cli/handling-process-env#Adding-to-process.env)).
 If not provided, the app domain is deduced from `window.location.origin`.
 While building for SSR/SSG you _must_ set `process.env.META_APP_DOMAIN` as `window` object is not defined.
+**Note that the provided domain MUST include the protocol (eg. 'https://') to work correctly**
 
 How to set it:
 
@@ -170,14 +171,24 @@ export default {
 ## Dynamic support for i18n
 
 Be sure to understand how [App Internationalization (i18n)](https://quasar.dev/options/app-internationalization#Introduction) works before proceeding.
-This mixin assumes [`vue-i18n`](https://github.com/intlify/vue-i18n-next) has already been set up in your project.
+This composable assumes [`vue-i18n`](https://github.com/intlify/vue-i18n-next) has already been set up in your project.
 
-`usePageSocialMeta` is perfect until you add internationalization to the mix, which requires to dynamically update you tags and meta tags accordingly to the selected language: `usePageSocialMetaI18n` address this use case.
+`usePageSocialMeta` is perfect until you add internationalization to the mix, which requires to dynamically update your tags and meta tags accordingly to the selected language: `usePageSocialMetaI18n` addresses this use case.
 
 ### Using `usePageSocialMetaI18n`
 
-You use `usePageSocialMetaI18n` exactly how you would use `usePageSocialMeta`, except you provide "translation paths" as arguments instead of the text itself.
-The mixin automatically react to locale changes, updating meta tags accordingly.
+You use `usePageSocialMetaI18n` exactly how you would use `usePageSocialMeta`, except it will try to use provided arguments as "translation paths", and fallback using them as content if no translation can be found.
+The "translation paths" are those you use to access translations with `vue-i18n` methods.
+In the following snippet the "translation path" is `contacts.form.title`:
+
+```html
+<p>{{ $t('contacts.form.title') }}</p>
+```
+
+If you provide the third argument, the composable will apply i18n best practices for SEO such as:
+
+1. adding [alternate locale links](https://developers.google.com/search/docs/advanced/crawling/localized-versions) for search engines;
+2. adding [Open Graph locale tags](https://ogp.me/#optional) to better support Facebook and Twitter.
 
 ```ts
 // src/i18n/it/contacts.ts    <-- Notice these are the website italian translations
@@ -198,6 +209,8 @@ export default {
 ```ts
 // src/pages/contacts.vue
 
+// This is needed to force TS to evaluate the shim providing types for '*/i18n' sub-path
+import "@dreamonkey/quasar-app-extension-meta";
 import { usePageSocialMetaI18n } from "@dreamonkey/quasar-app-extension-meta/i18n";
 
 const titlePath = "contacts.meta.title"; // <-- The title 'translation path'
@@ -206,17 +219,50 @@ const descriptionPath = "contacts.meta.description"; // <-- The description 'tra
 export default {
   name: "ContactPage",
   setup() {
-    usePageSocialMetaI18n(titlePath, descriptionPath);
+    // List of all locales the page is available in
+    const metaAlternateLocales = [
+      {
+        locale: "it", // format: [ISO 639-1 codes]-[ISO 3166-1 alpha-2]
+        url: "/it/contatti", // Relative url
+      },
+      // Only for United Kingdom
+      {
+        locale: "en-GB",
+        url: "/en-GB/contacts",
+      },
+      // For all other english countries
+      {
+        locale: "en",
+        url: "/en/contacts",
+      },
+      {
+        locale: "fr",
+        url: "/fr/contacts",
+      },
+    ];
+
+    // Providing 'metaAlternateLocales' is optional, but we strongly advise to provide it
+    usePageSocialMetaI18n(titlePath, descriptionPath, metaAlternateLocales);
   },
 };
 ```
 
-The "translation paths" are those you use to access translations with `vue-i18n` methods.
-In the following snippet the "translation path" is `contacts.form.title`:
+The [ISO 639-1 codes](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) is the language code, while [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) is the **optional** country code. See [this article](https://developers.google.com/search/docs/advanced/crawling/localized-versions#supported-languageregion-codes) for more examples.
 
-```html
-<p>{{ $t('contacts.form.title') }}</p>
-```
+> **Important**: this plugin assumes that all alternate locale pages are on the same base domain.
+> We're aware that some i18n techniques include setting up a subdomains per locale, or entirely different domains altogether.
+> These use cases are currenty **not** supported. If you need to support them feel free to submit a PR.
+> Some examples we don't currently support:
+>
+> ```
+> Subdomains:
+> - https://www.it.foobar.com/homepage
+> - https://www.en.foobar.com/homepage
+>
+> or different domains:
+> - https://www.foo.com/homepage
+> - https://www.bar.com/homepage
+> ```
 
 ## Testing social preview
 

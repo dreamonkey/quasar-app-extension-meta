@@ -22,8 +22,14 @@
 // we should be able to remove this workaround and rely on something much simpler
 
 declare module "@dreamonkey/quasar-app-extension-meta/i18n" {
+  interface I18nAlternateLocale {
+    routePath: string;
+    locale: string;
+  }
+
   function usePageSocialMetaI18n(
-    titlePath: string,
-    descriptionPath: string
+    titlePathOrContent: string,
+    descriptionPathOrContent: string,
+    locales?: I18nAlternateLocale[]
   ): void;
 }
