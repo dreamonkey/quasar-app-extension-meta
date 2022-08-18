@@ -222,22 +222,22 @@ export default {
     // List of all locales the page is available in
     const metaAlternateLocales = [
       {
+        routePath: "/it/contatti", // Relative url
         locale: "it", // format: [ISO 639-1 codes]-[ISO 3166-1 alpha-2]
-        url: "/it/contatti", // Relative url
       },
       // Only for United Kingdom
       {
+        routePath: "/en-GB/contacts",
         locale: "en-GB",
-        url: "/en-GB/contacts",
       },
       // For all other english countries
       {
+        routePath: "/en/contacts",
         locale: "en",
-        url: "/en/contacts",
       },
       {
+        routePath: "/fr/contacts",
         locale: "fr",
-        url: "/fr/contacts",
       },
     ];
 
@@ -284,7 +284,7 @@ usePageSocialMeta(title: string, description: string);
 ```
 
 ```ts
-usePageSocialMetaI18n(titlePath: string, descriptionPath: string);
+usePageSocialMetaI18n(titlePath: string, descriptionPath: string, locales: I18nAlternateLocale[] = []);
 ```
 
 ```ts
