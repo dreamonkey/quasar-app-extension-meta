@@ -15,9 +15,10 @@
     "i18n"
   ],
   "main": "dist/exports.js",
+  "module": "dist/esm/exports.js",
   "types": "dist/exports.d.ts",
   "scripts": {
-    "build": "rm -rf dist i18n && tsc --declaration && tsc --project tsconfig.i18n.json",
+    "build": "rm -rf dist i18n && tsc --declaration && tsc --project tsconfig.i18n.json && tsc --project tsconfig.esm.json",
     "install-build-clean": "yarn install && yarn build && rm -rf node_modules",
     "test": "echo \"No test specified\" && exit 0",
     "deploy": "yarn build && yarn publish --tag latest"
